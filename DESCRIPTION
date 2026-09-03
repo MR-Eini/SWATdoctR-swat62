@@ -1,7 +1,7 @@
 Package: SWATdoctR
 Type: Package
 Title: Finding the right diagnoses and treatments for SWAT+ models
-Version: 0.1.27
+Version: 0.1.28
 Authors@R: c(
     person("Christoph", "Schuerz", , "christoph.schuerz@ufz.de", role = c("aut"),
         comment = c(ORCID = "0000-0002-7204-5828")),
@@ -10,11 +10,12 @@ Authors@R: c(
 Maintainer: Svajunas Plunge <svajunas_plunge@sggw.edu.pl>
 Description: A collection of functions for verification and evaluation of SWAT+ model setups. 
 License: MIT + file LICENSE
-URL: https://biopsichas.github.io/SWATdoctR, https://github.com/biopsichas/SWATdoctR
-BugReports: https://github.com/biopsichas/SWATdoctR/issues
+URL: https://github.com/MR-Eini/SWATdoctR-swat62
+BugReports: https://github.com/MR-Eini/SWATdoctR-swat62/issues
 Depends:
     R (>= 4.2.0)
 Imports:
+    SWATreadR (>= 0.1.0.9011),
   data.table,
   dplyr,
   ggplot2,
@@ -33,8 +34,11 @@ Imports:
   tidyselect,
   plotly
 Suggests:
+    testthat (>= 3.0.0),
   datasets,
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Remotes: MR-Eini/SWATreadR-swat62
+Config/testthat/edition: 3

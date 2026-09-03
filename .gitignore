@@ -5,3 +5,8 @@
 test*
 **/*backup/
 renv*
+
+!tests/
+!tests/**
+
+!compatibility/test-summary.json

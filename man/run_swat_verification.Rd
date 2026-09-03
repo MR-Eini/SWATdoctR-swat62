@@ -37,20 +37,14 @@ plant stresses for plant growth. Set \code{nostress = 0} to activate all stress
 factors, \code{nostress = 1} to deactivate all stress factors, and \code{nostress = 2}
 to only activate nutrient plant stress.}
 
-\item{keep_folder}{(optional) If \code{keep_folder = TRUE}
-'.model_run/verification' is kept and not deleted after finishing model runs.
-In this case '.model_run' is reused in a new model run if \code{refresh = FALSE}.
-\code{Default = FALSE}}
+\item{keep_folder}{Keep this run's directory under \code{.run_verify} when TRUE.
+Each call uses a fresh directory. Default is FALSE.}
 }
 \value{
 Returns the simulation results for the defined output variables as a
 list of tibbles.
 }
 \description{
-This function allows to run a SWAT2012 project in R.
-Basic settings for the SWAT run such as the simulation period or the time
-interval for the outputs can be done directly. SWAT simulation outputs can be
-defined that are returned in a 'tidy' format in R. Functionality such as model
-parametrization, parallel execution of simulations, or incremental saving of
-simulation runs is provided.
+Execute a SWAT+ model in a fresh working directory and read outputs used
+for water-balance, management, and plant-growth verification.
 }

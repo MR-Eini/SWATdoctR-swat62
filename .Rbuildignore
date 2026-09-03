@@ -4,9 +4,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
-^test*
+^test$
 ^README\.Rmd$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^vignettes$
+
+^COMPATIBILITY\.md$

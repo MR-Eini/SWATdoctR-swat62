@@ -1,11 +1,7 @@
 #' Run simulations for model verification
 #'
-#' This function allows to run a SWAT2012 project in R.
-#' Basic settings for the SWAT run such as the simulation period or the time
-#' interval for the outputs can be done directly. SWAT simulation outputs can be
-#' defined that are returned in a 'tidy' format in R. Functionality such as model
-#' parametrization, parallel execution of simulations, or incremental saving of
-#' simulation runs is provided.
+#' Execute a SWAT+ model in a fresh working directory and read outputs used
+#' for water-balance, management, and plant-growth verification.
 #'
 #' @param project_path Path to the SWAT+ project folder (i.e. TxtInOut).
 #' @param outputs Define the outputs that should be read after the simulation
@@ -23,10 +19,8 @@
 #'   plant stresses for plant growth. Set \code{nostress = 0} to activate all stress
 #'   factors, \code{nostress = 1} to deactivate all stress factors, and \code{nostress = 2}
 #'   to only activate nutrient plant stress.
-#' @param keep_folder (optional) If \code{keep_folder = TRUE}
-#'   '.model_run/verification' is kept and not deleted after finishing model runs.
-#'   In this case '.model_run' is reused in a new model run if \code{refresh = FALSE}.
-#'   \code{Default = FALSE}
+#' @param keep_folder Keep this run's directory under `.run_verify` when TRUE.
+#'   Each call uses a fresh directory. Default is FALSE.
 #'
 #' @return Returns the simulation results for the defined output variables as a
 #'   list of tibbles.
@@ -61,13 +55,13 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
   msg <- run(run_os(swat_exe, os), wd = run_path,
              error_on_status = FALSE)
 
-  if(nchar(msg$stderr) > 0) {
+  if(msg$status != 0L || !grepl("Execution successfully completed", msg$stdout, fixed = TRUE)) {
     out_msg <- str_split(msg$stdout, '\r\n|\r|\n', simplify = TRUE) %>%
       .[max(1, length(.) - 10):length(.)]
     err_msg <- str_split(msg$stderr, '\r\n|\r|\n', simplify = TRUE)
-    err_msg <- c('Last output:', out_msg, 'Error:', err_msg)
+    err_msg <- c(paste('SWAT exit status:', msg$status), 'Last output:', out_msg, 'Error:', err_msg)
     model_output <- err_msg
-  } else if(nchar(msg$stderr) == 0) {
+  } else {
     model_output <- list()
     if ('plt' %in% outputs) {
       model_output$hru_pw_day <- read_tbl('hru_pw_day.txt', run_path, 3) %>% lwr
@@ -106,7 +100,8 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
     }
   }
 
-  if(!keep_folder) unlink(run_path, recursive = TRUE, force = TRUE)
+  if (!keep_folder) unlink(run_path, recursive = TRUE, force = TRUE)
+  if (keep_folder) attr(model_output, "run_path") <- run_path
 
   return(model_output)
 }
@@ -128,6 +123,7 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
 #'
 read_tbl <- function(file, run_path, n_skip) {
   file_path <- paste0(run_path, '/', file)
+  if (n_skip == 3L) return(SWATreadR::read_swat_output(file_path))
 
   col_names <- read_lines(file = file_path, skip = 1, n_max = 1, lazy = FALSE) %>%
     str_trim(.) %>%
@@ -170,21 +166,8 @@ read_tbl <- function(file, run_path, n_skip) {
 read_mgt <- function(run_path) {
   file_path <- paste0(run_path, '/mgt_out.txt')
 
-  mgt <- read_lines(file_path, skip = 3, lazy = FALSE) %>%
-    unlist() %>%
-    str_trim(.) %>%
-    str_split(., '\t[:space:]+|[:space:]+') %>%
-    map(., ~ .x[1:21]) %>%
-    unlist() %>%
-    matrix(., nrow = 21) %>%
-    t() %>%
-    as_tibble(., .name_repair = 'minimal') %>%
-    set_names(., c('hru', 'year', 'mon', 'day', 'op_typ', 'operation',
-                   'phubase', 'phuplant', 'soil_water', 'plant_bioms',
-                   'surf_rsd', 'soil_no3', 'soil_solp', 'op_var',
-                   paste0('var', 1:7)))
-
-  mgt[,c(1:4, 7:21)] <- map_df(mgt[,c(1:4, 7:21)], as.numeric)
+  mgt <- SWATreadR::read_swat_mgt(file_path)
+  names(mgt)[names(mgt) == "crop/fert/pest"] <- "op_typ"
 
   return(mgt)
 }

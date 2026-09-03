@@ -5,15 +5,15 @@
 #'
 #' @keywords internal
 build_model_run <- function(project_path, folder_name) {
-  run_path <- paste0(project_path, folder_name)
-
-  swat_files <- dir(project_path, full.names = TRUE)
-  exclude <- ".txt$|.csv$|.db$"
-  swat_files <- swat_files[!grepl(exclude, swat_files)]
-
-  dir.create(run_path, recursive = TRUE)
-  file.copy(swat_files, run_path)
-
+  base_path <- paste0(project_path, folder_name)
+  dir.create(base_path, recursive = TRUE, showWarnings = FALSE)
+  run_path <- tempfile("run-", tmpdir = base_path)
+  dir.create(run_path)
+  swat_files <- list.files(project_path, full.names = TRUE)
+  swat_files <- swat_files[!dir.exists(swat_files)]
+  # Preserve input files; generated output files are not reused.
+  swat_files <- swat_files[!grepl("\\.(txt|csv|db|out)$", swat_files, ignore.case = TRUE)]
+  if (!all(file.copy(swat_files, run_path))) stop("Could not copy verification inputs.")
   run_path
 }
 
@@ -40,40 +40,23 @@ set_print_prt <- function(project_path, run_path, outputs, years_skip) {
 
   print_prt <- read_lines(paste0(project_path, "/print.prt"), lazy = FALSE)
 
-  # Turn off all outputs by default, then selectively activate below
-  print_prt[7] <- "n n n "
-  print_prt[7] <- "n n n n "
-
-  print_prt[11:length(print_prt)] <-
-    paste0(str_sub(print_prt[11:length(print_prt)], 1, 29), "n n n n ")
-
-  if (!is.null(years_skip)) {
-    print_prt[3] <- str_replace(
-      print_prt[3],
-      "[:digit:]+(?=[:space:])",
-      as.character(years_skip)
-    )
-  }
-
+  requested <- list()
   if ("wb" %in% outputs) {
-    print_prt[11] <- "basin_wb y n n y "
-    print_prt[14] <- "basin_pw y n n n "
-    print_prt[15] <- "basin_aqu n n n y "
-    print_prt[18] <- "basin_sd_cha n n n y "
-    print_prt[33] <- "hru_wb n n n y "
-    print_prt[45] <- "recall n n y y "
+    requested <- list(basin_wb = c("daily", "avann"), basin_pw = "daily",
+      basin_aqu = "avann", basin_sd_cha = "avann", hru_wb = "avann",
+      recall = c("yearly", "avann"))
   }
-
-  if ("mgt" %in% outputs) {
-    print_prt[9] <- "n y n n "
-  }
-
-  if ("plt" %in% outputs) {
-    print_prt[36] <- "hru_pw y n n n "
-  }
-
-  if ("wb_sft" %in% outputs) {
-    print_prt[11] <- "basin_wb n n n y "
+  if ("plt" %in% outputs) requested$hru_pw <- "daily"
+  if ("wb_sft" %in% outputs) requested$basin_wb <- "avann"
+  print_prt <- SWATreadR::swat_print_objects(print_prt, requested)
+  print_prt <- SWATreadR::swat_print_options(print_prt,
+    mgtout = if ("mgt" %in% outputs) "y" else "n")
+  if (!is.null(years_skip)) {
+    if (length(years_skip) != 1L || !is.finite(years_skip) ||
+        years_skip < 0 || years_skip != trunc(years_skip)) {
+      stop("years_skip must be one nonnegative integer.")
+    }
+    print_prt <- SWATreadR::swat_control_set(print_prt, c(nyskip = years_skip))
   }
 
   write_lines(print_prt, paste0(run_path, "/print.prt"))
@@ -112,6 +95,9 @@ set_time_sim <- function(project_path, run_path, start_date, end_date) {
     # Determine required date indices for writing to time.sim
     start_date <- ymd(start_date)
     end_date   <- ymd(end_date)
+    if (anyNA(c(start_date, end_date)) || start_date > end_date) {
+      stop("Invalid or reversed simulation dates.")
+    }
 
     time_interval <- interval(start_date, end_date)
 
@@ -149,25 +135,10 @@ set_codes_bsn <- function(run_path, nostress) {
   bsn_path <- paste0(run_path, "/codes.bsn")
   bsn      <- read_lines(bsn_path)
 
-  # Split line 3 of codes.bsn into individual fields (file names + flags)
-  bsn_val <- bsn[3] %>%
-    str_trim() %>%
-    str_split("[:space:]+") %>%
-    unlist()
-
-  if (length(bsn_val) < 11) {
-    stop("codes.bsn line 3 has fewer than 11 fields; cannot set 'nostress'.")
+  if (length(nostress) != 1L || is.na(nostress) || !nostress %in% 0:2) {
+    stop("nostress must be 0, 1, or 2.")
   }
-
-  # In SWAT+ IO docs, 'nostress' is the 11th field on this line
-  bsn_val[11] <- as.character(nostress)
-
-  # Rebuild the line in a length-agnostic way to support newer SWAT+ versions
-  # (including additional flags such as 'modflow', etc.).
-  #
-  # SWAT+ reads this line as whitespace-separated values, so a simple
-  # space-separated collapse is sufficient and robust to field count changes.
-  bsn[3] <- paste(bsn_val, collapse = " ")
+  bsn <- SWATreadR::swat_control_set(bsn, c(nostress = nostress))
 
   write_lines(bsn, bsn_path)
 }
