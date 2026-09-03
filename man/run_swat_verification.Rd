@@ -35,7 +35,7 @@ years that are skipped before writing SWAT model outputs.}
 \item{nostress}{nostress parameter in the 'codes.bsn' file to activate/deactivate
 plant stresses for plant growth. Set \code{nostress = 0} to activate all stress
 factors, \code{nostress = 1} to deactivate all stress factors, and \code{nostress = 2}
-to only activate nutrient plant stress.}
+to deactivate nutrient plant stress while retaining other stresses.}
 
 \item{keep_folder}{Keep this run's directory under \code{.run_verify} when TRUE.
 Each call uses a fresh directory. Default is FALSE.}

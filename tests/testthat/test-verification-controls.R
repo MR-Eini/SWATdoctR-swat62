@@ -26,3 +26,13 @@ test_that("verification selects outputs despite new print sections", {
   expect_equal(SWATreadR::swat_control_get(result, "nyskip"), c(nyskip = "3"))
   expect_equal(SWATreadR::swat_control_get(result, "future_flag"), c(future_flag = "y"))
 })
+
+test_that("annual water-balance metadata stays separate from crop labels", {
+  result <- read_wb_aa(test_path("fixtures"))
+  expect_equal(result$precip, 792.783)
+  expect_equal(result$wet_stor, 0.390)
+  expect_equal(result$description, "Original Simulation 0")
+  expect_equal(result$cal_adj, 0)
+  expect_true(is.na(result$plant_cov))
+  expect_true(is.na(result$mgt_ops))
+})
