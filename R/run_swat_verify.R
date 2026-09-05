@@ -62,6 +62,7 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
     err_msg <- c(paste('SWAT exit status:', msg$status), 'Last output:', out_msg, 'Error:', err_msg)
     model_output <- err_msg
   } else {
+    assert_resolved_plants(run_path)
     model_output <- list()
     if ('plt' %in% outputs) {
       model_output$hru_pw_day <- read_tbl('hru_pw_day.txt', run_path, 3) %>% lwr
@@ -104,6 +105,32 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
   if (keep_folder) attr(model_output, "run_path") <- run_path
 
   return(model_output)
+}
+
+# Stop a successful executable run when SWAT+ silently substituted plant 1 for
+# plant names that it could not resolve. Revision 62 can otherwise complete and
+# produce plausible-looking verification plots labelled with `agrc`.
+assert_resolved_plants <- function(run_path) {
+  diagnostics_path <- file.path(run_path, "diagnostics.out")
+  if (!file.exists(diagnostics_path)) return(invisible(TRUE))
+
+  diagnostics <- readLines(diagnostics_path, warn = FALSE)
+  unresolved <- diagnostics[grepl("not found in plants.plt database",
+                                  diagnostics, fixed = TRUE)]
+  if (!length(unresolved)) return(invisible(TRUE))
+
+  plant_names <- trimws(sub(
+    ".*(?:op numb|plant numb)[[:space:]]+[0-9]+[[:space:]]+([^[:space:]]+).*",
+    "\\1", unresolved, perl = TRUE
+  ))
+  plant_names <- sort(unique(plant_names))
+  stop(
+    "SWAT+ completed but could not resolve plant names in plants.plt: ",
+    paste(plant_names, collapse = ", "),
+    ". The run was retained at ", normalizePath(run_path, winslash = "/"),
+    ". Migrate plants.plt to the revision 62 schema before creating reports.",
+    call. = FALSE
+  )
 }
 
 #' Read SWAT+ output that is arranged in a tabular format (most outputs)

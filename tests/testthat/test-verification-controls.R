@@ -36,3 +36,16 @@ test_that("annual water-balance metadata stays separate from crop labels", {
   expect_true(is.na(result$plant_cov))
   expect_true(is.na(result$mgt_ops))
 })
+
+test_that("verification rejects unresolved revision 62 plant names", {
+  path <- tempfile(); dir.create(path)
+  writeLines(c(
+    "DIAGNOSTICS.OUT FILE",
+    "mgt schedule 1 op numb 9 rye not found in plants.plt database",
+    "plant com 2 plant numb 1 fesc_mgt not found in plants.plt database"
+  ), file.path(path, "diagnostics.out"))
+
+  expect_error(assert_resolved_plants(path), "fesc_mgt, rye")
+  writeLines("DIAGNOSTICS.OUT FILE", file.path(path, "diagnostics.out"))
+  expect_true(assert_resolved_plants(path))
+})

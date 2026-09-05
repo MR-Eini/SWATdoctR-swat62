@@ -1,7 +1,7 @@
 Package: SWATdoctR
 Type: Package
 Title: Finding the right diagnoses and treatments for SWAT+ models
-Version: 0.1.29
+Version: 0.1.30
 Authors@R: c(
     person("Christoph", "Schuerz", , "christoph.schuerz@ufz.de", role = c("aut"),
         comment = c(ORCID = "0000-0002-7204-5828")),
@@ -15,7 +15,7 @@ BugReports: https://github.com/MR-Eini/SWATdoctR-swat62/issues
 Depends:
     R (>= 4.2.0)
 Imports:
-    SWATreadR (>= 0.1.0.9012),
+    SWATreadR (>= 0.1.0.9014),
   data.table,
   dplyr,
   ggplot2,

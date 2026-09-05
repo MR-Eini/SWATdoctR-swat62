@@ -4,14 +4,16 @@
 | Source snapshot | Package version | Browse code |
 | --- | --- | --- |
 | Before this update | 0.1.27 | [Old source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/before-swat62-update) |
-| Tested SWAT+ 62 update | 0.1.29 | [Updated source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/swat62-v0.1.29) |
+| Tested SWAT+ 62 update | 0.1.30 | [Updated source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/swat62-v0.1.30) |
 
-**[Compare old and updated code](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.29?w=1)** - GitHub highlights removed lines in red and added lines in green. Whitespace-only differences are hidden in this link; [show the complete diff](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.29) if needed.
+**[Compare old and updated code](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.30?w=1)** - GitHub highlights removed lines in red and added lines in green. Whitespace-only differences are hidden in this link; [show the complete diff](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.30) if needed.
 
 [Version history and change summary](VERSION-HISTORY.md) explains the baseline and tested scope. Original author attribution and upstream Git history are preserved.
 <!-- /swat62-version-navigation -->
 
 > **SWAT+ 62 development update:** See [compatibility and test coverage](COMPATIBILITY.md). This repository is maintained under MR-Eini; the upstream README and attribution follow.
+
+The [corrected SWAT+ 62 verification report](compatibility/reports/verification_results.pdf) contains the supplied crop names, including `fesc_mgt` and `rye`, and no substituted `agrc` labels.
 
 Introduction to SWATdoctR
 ================
