@@ -20,7 +20,8 @@
 #'   factors, \code{nostress = 1} to deactivate all stress factors, and \code{nostress = 2}
 #'   to deactivate nutrient plant stress while retaining other stresses.
 #' @param keep_folder Keep this run's directory under `.run_verify` when TRUE.
-#'   Each call uses a fresh directory. Default is FALSE.
+#'   Each call uses a fresh directory. When FALSE (the default), the run and
+#'   its empty `.run_verify` parent are removed even if verification fails.
 #'
 #' @return Returns the simulation results for the defined output variables as a
 #'   list of tibbles.
@@ -43,6 +44,9 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
   stopifnot(is.logical(keep_folder))
 
   run_path <- build_model_run(project_path, '/.run_verify')
+  if (!keep_folder) {
+    on.exit(cleanup_verification_run(run_path), add = TRUE)
+  }
 
   set_print_prt(project_path, run_path, outputs, years_skip)
   set_time_sim(project_path, run_path, start_date, end_date)
@@ -101,10 +105,21 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
     }
   }
 
-  if (!keep_folder) unlink(run_path, recursive = TRUE, force = TRUE)
   if (keep_folder) attr(model_output, "run_path") <- run_path
 
   return(model_output)
+}
+
+# Remove a verification run and its parent when no other run is present.
+cleanup_verification_run <- function(run_path) {
+  parent_path <- dirname(run_path)
+  if (dir.exists(run_path)) unlink(run_path, recursive = TRUE, force = TRUE)
+
+  if (dir.exists(parent_path)) {
+    remaining <- list.files(parent_path, all.files = TRUE, no.. = TRUE)
+    if (!length(remaining)) unlink(parent_path, recursive = TRUE, force = TRUE)
+  }
+  invisible(!dir.exists(run_path))
 }
 
 # Stop a successful executable run when SWAT+ silently substituted plant 1 for
@@ -127,8 +142,8 @@ assert_resolved_plants <- function(run_path) {
   stop(
     "SWAT+ completed but could not resolve plant names in plants.plt: ",
     paste(plant_names, collapse = ", "),
-    ". The run was retained at ", normalizePath(run_path, winslash = "/"),
-    ". Migrate plants.plt to the revision 62 schema before creating reports.",
+    ". Migrate plants.plt to the revision 62 schema before creating reports. ",
+    "Set keep_folder = TRUE only when the run directory is needed for debugging.",
     call. = FALSE
   )
 }

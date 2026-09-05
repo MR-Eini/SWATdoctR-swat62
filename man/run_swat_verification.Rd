@@ -38,7 +38,8 @@ factors, \code{nostress = 1} to deactivate all stress factors, and \code{nostres
 to deactivate nutrient plant stress while retaining other stresses.}
 
 \item{keep_folder}{Keep this run's directory under \code{.run_verify} when TRUE.
-Each call uses a fresh directory. Default is FALSE.}
+Each call uses a fresh directory. When FALSE (the default), the run and
+its empty \code{.run_verify} parent are removed even if verification fails.}
 }
 \value{
 Returns the simulation results for the defined output variables as a

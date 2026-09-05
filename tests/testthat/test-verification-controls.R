@@ -49,3 +49,20 @@ test_that("verification rejects unresolved revision 62 plant names", {
   writeLines("DIAGNOSTICS.OUT FILE", file.path(path, "diagnostics.out"))
   expect_true(assert_resolved_plants(path))
 })
+
+test_that("verification cleanup removes runs and only removes an empty parent", {
+  parent <- tempfile(); run_path <- file.path(parent, "run-one")
+  dir.create(run_path, recursive = TRUE)
+  expect_true(cleanup_verification_run(run_path))
+  expect_false(dir.exists(run_path))
+  expect_false(dir.exists(parent))
+
+  run_path <- file.path(parent, "run-one")
+  sibling <- file.path(parent, "run-two")
+  dir.create(run_path, recursive = TRUE)
+  dir.create(sibling)
+  expect_true(cleanup_verification_run(run_path))
+  expect_true(dir.exists(parent))
+  expect_true(dir.exists(sibling))
+  unlink(parent, recursive = TRUE, force = TRUE)
+})
