@@ -60,7 +60,8 @@ You can install the development version of **SWATdoctR** from [GitHub](https://g
 install.packages("remotes")
 
 # The installation of `SWATprepR`.
-remotes::install_github("biopsichas/SWATdoctR")
+remotes::install_github("MR-Eini/SWATreadR-swat62@swat62-v0.1.0.9015")
+remotes::install_github("MR-Eini/SWATdoctR-swat62@swat62-v0.1.32")
 ```
 
 ## Getting started

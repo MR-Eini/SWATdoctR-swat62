@@ -12,13 +12,13 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Finding the right diagnoses and treatments for SWAT+ models">
 <meta name="description" content="A collection of functions for verification and evaluation of SWAT+ model setups.">
 <meta property="og:description" content="A collection of functions for verification and evaluation of SWAT+ model setups.">
-<meta property="og:image" content="https://biopsichas.github.io/SWATdoctR/logo.png">
+<meta property="og:image" content="https://mr-eini.github.io/SWATdoctR-swat62/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">SWATdoctR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.27</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.32</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/biopsichas/SWATdoctR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/MR-Eini/SWATdoctR-swat62/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -65,7 +65,47 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level1">
+  <main id="main" class="col-md-9"><p><strong>Review the SWAT+ 62 package changes</strong></p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Source snapshot</th>
+<th>Package version</th>
+<th>Browse code</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Before this update</td>
+<td>0.1.27</td>
+<td><a href="https://github.com/MR-Eini/SWATdoctR-swat62/tree/before-swat62-update" class="external-link">Old source</a></td>
+</tr>
+<tr>
+<td>Tested SWAT+ 62 update</td>
+<td>0.1.32</td>
+<td><a href="https://github.com/MR-Eini/SWATdoctR-swat62/tree/swat62-v0.1.32" class="external-link">Updated source</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong><a href="https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.32?w=1" class="external-link">Compare old and updated code</a></strong> - GitHub highlights removed lines in red and added lines in green. Whitespace-only differences are hidden in this link; <a href="https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.32" class="external-link">show the complete diff</a> if needed.</p>
+<p><a href="VERSION-HISTORY.html">Version history and change summary</a> explains the baseline and tested scope. Original author attribution and upstream Git history are preserved. <!-- /swat62-version-navigation --></p>
+<p>The current development version is <strong>0.1.32</strong>, requiring <strong>SWATreadR 0.1.0.9015</strong>. Standard and management outputs are parsed in bounded chunks. Files larger than 256 MiB use two passes and allocate the result once, avoiding the extra full-table copy from binding all chunks. The complete returned table still needs enough RAM. See <a href="NEWS.html">NEWS.md</a> for this update.</p>
+<p>To recover an existing completed verification after a reading error, restart R after installing both packages and read the saved folder directly:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MR-Eini/SWATdoctR-swat62" class="external-link">SWATdoctR</a></span><span class="op">)</span></span>
+<span><span class="va">Run_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_swat_verification.html">read_swat_verification</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">setup_path</span>, <span class="st">".run_verify"</span><span class="op">)</span>,</span>
+<span>  outputs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wb"</span>, <span class="st">"mgt"</span>, <span class="st">"plt"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>For runs created by newer versions, pass the specific run directory under <code>.run_verify</code> instead. This reads saved outputs and inputs without executing SWAT+ or deleting the folder. The fixed tags identify the tested source snapshots.</p>
+<blockquote>
+<p><strong>SWAT+ 62 development update:</strong> See <a href="COMPATIBILITY.html">compatibility and test coverage</a>. This repository is maintained under MR-Eini; the upstream README and attribution follow.</p>
+</blockquote>
+<p>The <a href="compatibility/reports/verification_results.pdf">corrected SWAT+ 62 verification report</a> contains the supplied crop names, including <code>fesc_mgt</code> and <code>rye</code>, and no substituted <code>agrc</code> labels.</p>
+<div class="section level1">
 <div class="page-header">
 <img src="logo.png" class="logo" alt=""><h1 id="introduction-to-swatdoctr">Introduction to SWATdoctR<a class="anchor" aria-label="anchor" href="#introduction-to-swatdoctr"></a>
 </h1>
@@ -105,7 +145,7 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the development version of <strong>SWATdoctR</strong> from <a href="https://github.com/biopsichas/SWATdoctR/" class="external-link">GitHub</a>.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># If the package 'remotes' is not installed run first:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span></span>
@@ -115,7 +155,7 @@
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>To get started with <code>SWATdoctR</code>, please refer to the vignettes available at: <a href="https://biopsichas.github.io/SWATdoctR/articles/qa.html">https://biopsichas.github.io/SWATdoctR/</a>.</p>
+<p>To get started with <code>SWATdoctR</code>, please refer to the vignettes available at: <a href="https://biopsichas.github.io/SWATdoctR/articles/qa.html" class="external-link">https://biopsichas.github.io/SWATdoctR/</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -137,8 +177,8 @@ Plunge, Svajunas, Brigitta Szabó, Michael Strauch, Natalja Čerkasova, Christop
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/biopsichas/SWATdoctR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/biopsichas/SWATdoctR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/MR-Eini/SWATdoctR-swat62/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/MR-Eini/SWATdoctR-swat62/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -177,7 +217,7 @@ Plunge, Svajunas, Brigitta Szabó, Michael Strauch, Natalja Čerkasova, Christop
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

@@ -66,47 +66,61 @@ run_swat_verification <- function(project_path, outputs = c('wb', 'mgt', 'plt'),
     err_msg <- c(paste('SWAT exit status:', msg$status), 'Last output:', out_msg, 'Error:', err_msg)
     model_output <- err_msg
   } else {
-    assert_resolved_plants(run_path)
-    model_output <- list()
-    if ('plt' %in% outputs) {
-      model_output$hru_pw_day <- read_tbl('hru_pw_day.txt', run_path, 3) %>% lwr
-    }
-    if ('wb' %in% outputs) {
-      model_output$basin_wb_day  <- read_tbl('basin_wb_day.txt', run_path, 3) %>% lwr
-      model_output$basin_pw_day  <- read_tbl('basin_pw_day.txt', run_path, 3) %>% lwr
-      model_output$basin_wb_aa   <- read_wb_aa(run_path) %>% lwr
-      model_output$basin_aqu_aa  <- read_tbl('basin_aqu_aa.txt',  run_path, 3) %>% lwr
-      # model_output$basin_cha_aa  <- read_tbl('basin_sd_cha_aa.txt',  run_path, 3) %>% lwr
-      model_output$hru_wb_aa <- read_tbl('hru_wb_aa.txt', run_path, 3) %>% lwr
-      tryCatch({
-        model_output$recall_yr <- read_tbl('recall_yr.txt', run_path, 3) %>% lwr
-      },
-      error = function(e) {
-        model_output$recall_yr <- NULL
-      })
-      tryCatch({
-        model_output$exco_om <- read_tbl('exco_om.exc', run_path, 2) %>% lwr
-      },
-      error = function(e) {
-        model_output$exco_om <- NULL
-      })
-    }
-    if ('mgt' %in% outputs) {
-      model_output$mgt_out <- read_mgt(run_path) %>% lwr
-      model_output$mgt_sch <- read_sch(run_path) %>% lwr
-
-      hru_data <- read_tbl('hru-data.hru', run_path, 2) %>% lwr
-      landuse_lum <- read_tbl('landuse.lum', run_path, 2) %>% lwr
-      model_output$lum_mgt <- left_join(hru_data,
-                                        landuse_lum,
-                                        by = c("lu_mgt" = 'name')) %>%
-        distinct() %>%
-        select(id, topo, hydro, soil, lu_mgt, plnt_com, mgt, tile)
-    }
+    model_output <- read_swat_verification(run_path, outputs)
   }
 
   if (keep_folder) attr(model_output, "run_path") <- run_path
 
+  return(model_output)
+}
+
+#' Read outputs from an existing SWAT+ verification run
+#'
+#' Recover a completed run after an output-reading error without executing SWAT+
+#' again. The directory must contain the requested outputs and management inputs.
+#' Large outputs are parsed in chunks, but the returned tables still require RAM.
+#' This function does not change or remove the run directory. It checks unresolved
+#' plant diagnostics; reading outputs alone does not certify model completion.
+#' @param run_path Directory containing the existing SWAT+ outputs and inputs.
+#' @param outputs Verification groups to read: `wb`, `mgt`, and/or `plt`.
+#' @return The same list of verification tibbles as a successful
+#'   [run_swat_verification()] call.
+#' @export
+read_swat_verification <- function(run_path, outputs = c("wb", "mgt", "plt")) {
+  stopifnot(is.character(run_path), length(run_path) == 1L,
+            !is.na(run_path), dir.exists(run_path),
+            is.character(outputs), all(outputs %in% c("wb", "mgt", "plt")))
+  assert_resolved_plants(run_path)
+  model_output <- list()
+  if ('plt' %in% outputs) {
+    model_output$hru_pw_day <- read_tbl('hru_pw_day.txt', run_path, 3) %>% lwr
+  }
+  if ('wb' %in% outputs) {
+    model_output$basin_wb_day  <- read_tbl('basin_wb_day.txt', run_path, 3) %>% lwr
+    model_output$basin_pw_day  <- read_tbl('basin_pw_day.txt', run_path, 3) %>% lwr
+    model_output$basin_wb_aa   <- read_wb_aa(run_path) %>% lwr
+    model_output$basin_aqu_aa  <- read_tbl('basin_aqu_aa.txt',  run_path, 3) %>% lwr
+    # model_output$basin_cha_aa  <- read_tbl('basin_sd_cha_aa.txt',  run_path, 3) %>% lwr
+    model_output$hru_wb_aa <- read_tbl('hru_wb_aa.txt', run_path, 3) %>% lwr
+    if (file.exists(file.path(run_path, "recall_yr.txt"))) {
+      model_output$recall_yr <- read_tbl('recall_yr.txt', run_path, 3) %>% lwr
+    }
+    if (file.exists(file.path(run_path, "exco_om.exc"))) {
+      model_output$exco_om <- read_tbl('exco_om.exc', run_path, 2) %>% lwr
+    }
+  }
+  if ('mgt' %in% outputs) {
+    model_output$mgt_out <- read_mgt(run_path) %>% lwr
+    model_output$mgt_sch <- read_sch(run_path) %>% lwr
+
+    hru_data <- read_tbl('hru-data.hru', run_path, 2) %>% lwr
+    landuse_lum <- read_tbl('landuse.lum', run_path, 2) %>% lwr
+    model_output$lum_mgt <- left_join(hru_data,
+                                      landuse_lum,
+                                      by = c("lu_mgt" = 'name')) %>%
+      distinct() %>%
+      select(id, topo, hydro, soil, lu_mgt, plnt_com, mgt, tile)
+  }
   return(model_output)
 }
 
@@ -164,7 +178,7 @@ assert_resolved_plants <- function(run_path) {
 #' @keywords internal
 #'
 read_tbl <- function(file, run_path, n_skip) {
-  file_path <- paste0(run_path, '/', file)
+  file_path <- file.path(run_path, file)
   if (n_skip == 3L) return(SWATreadR::read_swat_output(file_path))
 
   col_names <- read_lines(file = file_path, skip = 1, n_max = 1, lazy = FALSE) %>%
@@ -181,7 +195,12 @@ read_tbl <- function(file, run_path, n_skip) {
     }
   }
 
-  df <- fread(file_path, skip = n_skip, header = FALSE)
+  df <- withCallingHandlers(
+    fread(file = file_path, skip = n_skip, header = FALSE, sep = " ",
+          quote = ""),
+    warning = function(w) stop("Cannot safely parse ", file, ": ",
+                               conditionMessage(w), call. = FALSE)
+  )
 
   if(ncol(df) != length(col_names)) {
     warning(paste0('Number of columns in the ',"'", file, "'", ' does not match the number of column names.

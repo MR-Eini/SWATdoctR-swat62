@@ -4,12 +4,33 @@
 | Source snapshot | Package version | Browse code |
 | --- | --- | --- |
 | Before this update | 0.1.27 | [Old source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/before-swat62-update) |
-| Tested SWAT+ 62 update | 0.1.31 | [Updated source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/swat62-v0.1.31) |
+| Tested SWAT+ 62 update | 0.1.32 | [Updated source](https://github.com/MR-Eini/SWATdoctR-swat62/tree/swat62-v0.1.32) |
 
-**[Compare old and updated code](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.31?w=1)** - GitHub highlights removed lines in red and added lines in green. Whitespace-only differences are hidden in this link; [show the complete diff](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.31) if needed.
+**[Compare old and updated code](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.32?w=1)** - GitHub highlights removed lines in red and added lines in green. Whitespace-only differences are hidden in this link; [show the complete diff](https://github.com/MR-Eini/SWATdoctR-swat62/compare/before-swat62-update...swat62-v0.1.32) if needed.
 
 [Version history and change summary](VERSION-HISTORY.md) explains the baseline and tested scope. Original author attribution and upstream Git history are preserved.
 <!-- /swat62-version-navigation -->
+
+The current development version is **0.1.32**, requiring **SWATreadR
+0.1.0.9015**. Standard and management outputs are parsed in bounded chunks.
+Files larger than 256 MiB use two passes and allocate the result once, avoiding
+the extra full-table copy from binding all chunks. The complete returned table
+still needs enough RAM. See [NEWS.md](NEWS.md) for this update.
+
+To recover an existing completed verification after a reading error, restart R
+after installing both packages and read the saved folder directly:
+
+```r
+library(SWATdoctR)
+Run_1 <- read_swat_verification(
+  file.path(setup_path, ".run_verify"),
+  outputs = c("wb", "mgt", "plt")
+)
+```
+
+For runs created by newer versions, pass the specific run directory under
+`.run_verify` instead. This reads saved outputs and inputs without executing
+SWAT+ or deleting the folder. The fixed tags identify the tested source snapshots.
 
 > **SWAT+ 62 development update:** See [compatibility and test coverage](COMPATIBILITY.md). This repository is maintained under MR-Eini; the upstream README and attribution follow.
 
